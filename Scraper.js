@@ -29,18 +29,20 @@ async function fetchProductInfo(ProductId) {
     //     }
     // });
 
-    await page.goto('https://www.woolworths.com.au/shop/productdetails/270829',{ timeout : 10000})
-
-    const tensecpromise = new Promise((resolve, reject) => {
-        setTimeout(resolve, 500, 'one');
-    });
-
+    await page.goto(`https://www.woolworths.com.au/`,{ timeout : 10000})
+    const responsePromise = page.waitForResponse(response => response.url().includes('apis/ui/product/detail'));
     await page.goto(`https://www.woolworths.com.au/shop/productdetails/${ProductId}`,{ timeout : 10000})
+    
+    const fivesecpromise = new Promise((resolve, reject) => {
+        setTimeout(resolve, 5000, 'timeout');
+    });
+    const response = await Promise.race([responsePromise, fivesecpromise]);
 
-    const response = await Promise.race([
-        await page.waitForResponse(response => response.url().includes('apis/ui/product/detail')),
-        tensecpromise
-    ])
+    if (response === 'timeout') {
+        console.log('Request timed out');
+        await browser.close();
+        return;
+    }
 
     const jsonResponse = await response.json();
     const productData = jsonResponse['Product'];
