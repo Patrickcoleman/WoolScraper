@@ -1,12 +1,5 @@
-version: 0.0
-os: linux
+#!/bin/bash
 
-files:
-  - source: /
-    destination: /home/ec2-user/myapp
+chown ec2-user:ec2-user /home/ec2-user/myapp/subscriptions.json
 
-hooks:
-  AfterInstall:
-    - location: scripts/launch.sh
-      timeout: 300
-      runas: root
+sudo -u ec2-user pm2 restart subscriptionapi
