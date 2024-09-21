@@ -22,7 +22,8 @@ async function processSubscriptions(subscriptions){
         }
 
         console.log(`Email content for ${email}: ${emailstring}`);
-        mail(email, emailstring);
+        // mail(email, emailstring);
+        return
     }
 }
 
