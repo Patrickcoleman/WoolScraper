@@ -30,23 +30,29 @@ async function fetchProductInfo(ProductId) {
         }
     });
 
-    // Navigate to the product page
-    await page.goto(`https://www.woolworths.com.au/shop/productdetails/${ProductId}`);
+    const tensecpromise = new Promise((resolve, reject) => {
+        setTimeout(resolve, 500, 'one');
+      });
 
-    // Wait for the product API response
-    const response = await page.waitForResponse(response => response.url().includes('apis/ui/product/detail'));
+    await Promise.race([
+        tensecpromise,
+        await page.goto(`https://www.woolworths.com.au/shop/productdetails/${ProductId}`)
+    ])
 
-    // Process the response and extract product data
+    const response = await Promise.race([
+        tensecpromise,
+        await page.waitForResponse(response => response.url().includes('apis/ui/product/detail'))
+    ])
+
     const jsonResponse = await response.json();
     const productData = jsonResponse['Product'];
 
-    // Update the outer productObject with actual product data
     productObject.name = productData['Name'];
     productObject.onSpecial = productData['IsOnSpecial'];
     productObject.stockCode = productData['Stockcode'];
 
-    await browser.close(); // Close the browser once done
-    return productObject; // Return the product data
+    await browser.close();
+    return productObject;
 };
 
 module.exports = fetchProductInfo;
