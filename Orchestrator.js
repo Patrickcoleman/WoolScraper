@@ -3,7 +3,6 @@ const {loadSubscriptions} = require('./SubscriptionManager');
 const mail = require('./Mailer');
 
 let subscriptions = loadSubscriptions();
-console.log(subscriptions);
 
 async function processSubscriptions(subscriptions){
     for (const email in subscriptions){
@@ -23,8 +22,9 @@ async function processSubscriptions(subscriptions){
 
         console.log(`Email content for ${email}: ${emailstring}`);
         // mail(email, emailstring);
-        return
+        process.exit(0)
     }
 }
 
 processSubscriptions(subscriptions);
+

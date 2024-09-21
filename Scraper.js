@@ -1,3 +1,4 @@
+const { timeout } = require('puppeteer');
 const puppeteer = require('puppeteer');
 
 async function fetchProductInfo(ProductId) {
@@ -19,29 +20,26 @@ async function fetchProductInfo(ProductId) {
     });
 
     const page = await browser.newPage();
-    await page.goto('https://www.woolworths.com.au/shop/productdetails/270829');
+    // await page.setRequestInterception(true);
+    // page.on('request', interceptedRequest => {
+    //     if (interceptedRequest.url().endsWith('.png') || interceptedRequest.url().endsWith('.jpg')){
+    //         interceptedRequest.abort();
+    //     } else {
+    //         interceptedRequest.continue();
+    //     }
+    // });
 
-    await page.setRequestInterception(true);
-    page.on('request', interceptedRequest => {
-        if (interceptedRequest.url().endsWith('.png') || interceptedRequest.url().endsWith('.jpg')){
-            interceptedRequest.abort();
-        } else {
-            interceptedRequest.continue();
-        }
-    });
+    await page.goto('https://www.woolworths.com.au/shop/productdetails/270829',{ timeout : 10000})
 
     const tensecpromise = new Promise((resolve, reject) => {
         setTimeout(resolve, 500, 'one');
-      });
+    });
 
-    await Promise.race([
-        tensecpromise,
-        await page.goto(`https://www.woolworths.com.au/shop/productdetails/${ProductId}`)
-    ])
+    await page.goto(`https://www.woolworths.com.au/shop/productdetails/${ProductId}`,{ timeout : 10000})
 
     const response = await Promise.race([
-        tensecpromise,
-        await page.waitForResponse(response => response.url().includes('apis/ui/product/detail'))
+        await page.waitForResponse(response => response.url().includes('apis/ui/product/detail')),
+        tensecpromise
     ])
 
     const jsonResponse = await response.json();
