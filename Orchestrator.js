@@ -1,17 +1,29 @@
-// const {exec} = require('child_process');
 const fetchProductInfo = require('./Scraper');
+const {loadSubscriptions} = require('./SubscriptionManager');
+const mail = require('./Mailer');
 
-const productIds = [333388,686544,574746];
+let subscriptions = loadSubscriptions();
+console.log(subscriptions);
 
-(async () => {
-    for (const id of productIds) {
-        console.log(`Calling fetchProductInfo on product id ${id}`)
-        try {
-            const productData = await fetchProductInfo(id);
-            console.log(`Product ${productData['name']} with id ${id} is on special? ${productData['onSpecial']}`)
-        } catch (error) {
-            console.error(`Whoopsie: ${id}:`, error)
+async function processSubscriptions(subscriptions){
+    for (const email in subscriptions){
+        console.log(`Starting on email: ${email}`);
+        let emailstring = "";
+
+        for (const productId of subscriptions[email]){
+            try {
+                console.log(`Calling fetchProductInfo on product id ${productId}`);
+                const productData = await fetchProductInfo(productId);
+                console.log(`Product ${productData['name']} with id ${productId} is on special? ${productData['onSpecial']}`);
+                emailstring += `${productData['name']} is on special: ${productData['onSpecial']}\n`;
+            } catch (error) {
+                console.error(`Whoopsie: ${productId}:`, error);
+            }
         }
-    }
 
-})();
+        console.log(`Email content for ${email}: ${emailstring}`);
+        mail(email, emailstring);
+    }
+}
+
+processSubscriptions(subscriptions);

@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer');
 
 async function fetchProductInfo(ProductId) {
-
     let productObject = {
         name: 'unset',
         onSpecial: 'unset',
